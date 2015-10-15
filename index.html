@@ -37,6 +37,7 @@
     }
 
     function calc() {
+        clean();
         var id = document.getElementById("in").value;
         console.log(id);
         document.getElementById("data").innerHTML=id+'  -  '+encodeChatLink('item', id);
@@ -80,6 +81,12 @@
         xmlHttp.send(null);
     }
 
+    function clean() {
+        document.getElementById("data").innerHTML = '';
+        document.getElementById("res2").innerHTML = '';
+        document.getElementById("icon").removeAttribute('src');
+    }
+
     /* TODO :
      *  - add history of recent items
      *  - grab icon from API
@@ -87,9 +94,9 @@
      */
     </script>
     <style>
-        #res { margin: 20px; }
+        #res { margin: 20px; border: 1px solid black; width: 300px; }
         #res > * { vertical-align: middle; }
-        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+        pre { outline: 1px solid #ccc; padding: 5px; margin: 5px; margin-left: 20px; }
         .string { color: green; }
         .number { color: darkorange; }
         .boolean { color: blue; }
@@ -101,7 +108,7 @@
 </head>
 <body>
     <input id="in" value="12452" onkeypress="{if (event.keyCode==13)calc()}"/><button onclick="calc()">Calculate</button>
-    <div id="res"><img width="40" id="icon"/><span id="data"></span></div>
+    <div id="res"><img width="40" height="40" id="icon"/><span id="data"></span></div>
     <pre id="res2"></pre>
 </body>
 </html>
