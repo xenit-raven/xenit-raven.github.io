@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GW2-scripts</title>
+    <script>
+        var linkTypes = {item:2,text:3,map:4,skill:7,trait:8,recipe:10,skin:11,outfit:12};
+
+    function encodeChatLink(type, id) {
+        if (!type) {
+            return 'invalid type';
+        }
+        type = linkTypes[type.trim().toLowerCase()] || 0;
+        if (!type) {
+            return 'invalid type';
+        }
+
+        var data = [];
+        while (id > 0) {
+            data.push(id & 255);
+            id = id >> 8;
+        }
+        while (data.length < 4 || data.length % 2 != 0) {
+            data.push(0);
+        }
+
+        if (type == 2) {
+            data.unshift(1);
+        }
+        data.unshift(type);
+
+        // encode data
+        var binary = '';
+        for (var i = 0; i < data.length; i++) {
+            binary += String.fromCharCode(data[i]);
+        };
+        return '[&' + btoa(binary) + ']';
+    };
+
+    function calc() {
+        var id = document.getElementById("in").value;
+        console.log(id);
+        document.getElementById("res").innerHTML=id+'  -  '+encodeChatLink('item', id);
+    }
+
+    /* TODO :
+     *  - add history of recent items
+     *  - grab icon from API
+     *  - add API key support
+     */
+    </script>
+    <style>
+    #res {
+        margin: 20px;
+    }
+    </style>
+</head>
+<body>
+    <input id="in"></input><button onclick="calc()">bla</button>
+    <div id="res"></div>
+</body>
+</html>
