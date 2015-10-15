@@ -39,10 +39,11 @@
     function calc() {
         var id = document.getElementById("in").value;
         console.log(id);
-        document.getElementById("res").innerHTML=id+'  -  '+encodeChatLink('item', id);
+        document.getElementById("data").innerHTML=id+'  -  '+encodeChatLink('item', id);
         httpGetAsync('https://api.guildwars2.com/v2/items/'+id, function(res){
             console.log(res);
             document.getElementById("res2").innerHTML = syntaxHighlight(JSON.stringify(JSON.parse(res),undefined,4));
+            document.getElementById("icon").src = JSON.parse(res)['icon'];
         });
     }
 
@@ -86,21 +87,21 @@
      */
     </script>
     <style>
-    #res {
-        margin: 20px;
-    }
-    pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-    .string { color: green; }
-    .number { color: darkorange; }
-    .boolean { color: blue; }
-    .null { color: magenta; }
-    .key { color: black; }
-    #res2:empty { display: none; }
+        #res { margin: 20px; }
+        #res > * { vertical-align: middle; }
+        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: black; }
+        #res2:empty { display: none; }
+        #icon { margin-right: 15px; }
     </style>
 </head>
 <body>
     <input id="in" value="12452" onkeypress="{if (event.keyCode==13)calc()}"/><button onclick="calc()">Calculate</button>
-    <div id="res"></div>
+    <div id="res"><img width="40" id="icon"/><span id="data"></span></div>
     <pre id="res2"></pre>
 </body>
 </html>
