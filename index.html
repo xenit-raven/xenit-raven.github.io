@@ -3,7 +3,7 @@
 <head>
     <title>GW2-scripts</title>
     <script>
-        var linkTypes = {item:2,text:3,map:4,skill:7,trait:8,recipe:10,skin:11,outfit:12};
+    var linkTypes = {item:2,text:3,map:4,skill:7,trait:8,recipe:10,skin:11,outfit:12};
 
     function encodeChatLink(type, id) {
         if (!type) {
@@ -32,14 +32,51 @@
         var binary = '';
         for (var i = 0; i < data.length; i++) {
             binary += String.fromCharCode(data[i]);
-        };
+        }
         return '[&' + btoa(binary) + ']';
-    };
+    }
 
     function calc() {
         var id = document.getElementById("in").value;
         console.log(id);
         document.getElementById("res").innerHTML=id+'  -  '+encodeChatLink('item', id);
+        httpGetAsync('https://api.guildwars2.com/v2/items/'+id, function(res){
+            console.log(res);
+            document.getElementById("res2").innerHTML = syntaxHighlight(JSON.stringify(JSON.parse(res),undefined,4));
+        });
+    }
+
+    function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 2);
+        }
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    function httpGetAsync(theUrl, callback)
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        };
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
     }
 
     /* TODO :
@@ -52,10 +89,18 @@
     #res {
         margin: 20px;
     }
+    pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+    .string { color: green; }
+    .number { color: darkorange; }
+    .boolean { color: blue; }
+    .null { color: magenta; }
+    .key { color: black; }
+    #res2:empty { display: none; }
     </style>
 </head>
 <body>
-    <input id="in"></input><button onclick="calc()">bla</button>
+    <input id="in" value="12452" /><button onclick="calc()">bla</button>
     <div id="res"></div>
+    <pre id="res2"></pre>
 </body>
 </html>
