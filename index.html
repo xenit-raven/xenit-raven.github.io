@@ -36,17 +36,26 @@
         return '[&' + btoa(binary) + ']';
     }
 
-    function calc() {
+    var chatLink;
+    function calc(e) {
+        console.log(e);
         clean();
         var id = document.getElementById("in").value;
-        console.log(id);
-        document.getElementById("data").innerHTML=id+'  -  '+encodeChatLink('item', id);
+        chatLink = encodeChatLink('item', id);
+        console.log(e.type + ' ' + document);
+        document.execCommand('copy');
+        document.getElementById("data").innerHTML=id+'  -  '+chatLink;
         httpGetAsync('https://api.guildwars2.com/v2/items/'+id, function(res){
             console.log(res);
             document.getElementById("res2").innerHTML = syntaxHighlight(JSON.stringify(JSON.parse(res),undefined,4));
             document.getElementById("icon").src = JSON.parse(res)['icon'];
         });
     }
+
+    document.addEventListener('copy',function(e){
+        e.clipboardData.setData('text/plain', chatLink);
+        e.preventDefault();
+    },false);
 
     function syntaxHighlight(json) {
         if (typeof json != 'string') {
@@ -82,6 +91,7 @@
     }
 
     function clean() {
+        chatLink = undefined;
         document.getElementById("data").innerHTML = '';
         document.getElementById("res2").innerHTML = '';
         document.getElementById("icon").removeAttribute('src');
@@ -103,11 +113,11 @@
         .null { color: magenta; }
         .key { color: black; }
         #res2:empty { display: none; }
-        #icon { margin-right: 15px; }
+        #icon { margin-right: 15px; display: inline-block; }
     </style>
 </head>
 <body>
-    <input id="in" value="12452" onkeypress="{if (event.keyCode==13)calc()}"/><button onclick="calc()">Calculate</button>
+    <input id="in" value="12452" onkeypress="{if (event.keyCode==13) calc(event);}"/><button onclick="{calc(event);}">Calculate</button>
     <div id="res"><img width="40" height="40" id="icon"/><span id="data"></span></div>
     <pre id="res2"></pre>
 </body>
