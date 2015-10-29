@@ -88,7 +88,7 @@
         var id = document.getElementById("in").value;
         chatLink = encodeChatLink('item', id);
         console.log(e.type + ' ' + document);
-        document.execCommand('copy');
+        try{ document.execCommand('copy'); } catch(e) { console.error("Cannot copy to keyboard:", e); }
         document.getElementById("data").innerHTML=id+'  -  '+chatLink;
         httpGetAsync('https://api.guildwars2.com/v2/items/'+id, function(res){
             console.log(res);
