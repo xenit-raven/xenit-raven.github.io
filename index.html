@@ -3,16 +3,33 @@
 <head>
     <title>GW2-scripts</title>
     <script>
+    !function(){function t(t){this.message=t}var r="undefined"!=typeof exports?exports:this,e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";t.prototype=new Error,t.prototype.name="InvalidCharacterError",r.btoa||(r.btoa=function(r){for(var o,n,a=String(r),i=0,c=e,d="";a.charAt(0|i)||(c="=",i%1);d+=c.charAt(63&o>>8-i%1*8)){if(n=a.charCodeAt(i+=.75),n>255)throw new t("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");o=o<<8|n}return d}),r.atob||(r.atob=function(r){var o=String(r).replace(/=+$/,"");if(o.length%4==1)throw new t("'atob' failed: The string to be decoded is not correctly encoded.");for(var n,a,i=0,c=0,d="";a=o.charAt(c++);~a&&(n=i%4?64*n+a:a,i++%4)?d+=String.fromCharCode(255&n>>(-2*i&6)):0)a=e.indexOf(a);return d})}();
+
     var linkTypes = {item:2,text:3,map:4,skill:7,trait:8,recipe:10,skin:11,outfit:12};
 
+    var ABC = {
+        toAscii: function(bin) {
+            return bin.replace(/\s*[01]{8}\s*/g, function(bin) {
+                return String.fromCharCode(parseInt(bin, 2))
+            })
+        },
+        toBinary: function(str, spaceSeparatedOctets) {
+            return str.replace(/[\s\S]/g, function(str) {
+                str = ABC.zeroPad(str.charCodeAt().toString(2));
+                return !1 == spaceSeparatedOctets ? str : str + " "
+            })
+        },
+        zeroPad: function(num) {
+            return "00000000".slice(String(num).length) + num
+        }
+    };
+
     function encodeChatLink(type, id) {
-        if (!type) {
-            return 'invalid type';
-        }
+        if (!type) { return 'invalid type'; }
+
         type = linkTypes[type.trim().toLowerCase()] || 0;
-        if (!type) {
-            return 'invalid type';
-        }
+
+        if (!type) { return 'invalid type'; }
 
         var data = [];
         while (id > 0) {
@@ -33,7 +50,35 @@
         for (var i = 0; i < data.length; i++) {
             binary += String.fromCharCode(data[i]);
         }
+        decodeChatLink('[&' + btoa(binary) + ']');
         return '[&' + btoa(binary) + ']';
+    }
+
+    function decodeChatLink(input) {
+        input = /\[?&?([^\]]*)?/.exec(input)[1];
+
+        binary = atob(input);
+
+        var data = [];
+        for (var i = 0; i < binary.length; i++) {
+            data.push(binary.charCodeAt(i));
+        }
+
+        type = data.shift();
+        if(type === 2) { data.shift(); }
+
+
+        while (!(data.length < 4 || data.length % 2 != 0)) {
+            data.pop();
+        }
+
+        var id = data.pop();
+        while (data.length>0) {
+            id = id<<8;
+            id += data.pop();
+        }
+
+        console.log("type %s , id %s", type, id);
     }
 
     var chatLink;
@@ -104,6 +149,7 @@
      */
     </script>
     <style>
+        #selectType { height: 21px; }
         #res { margin: 20px; border: 1px solid black; width: 300px; }
         #res > * { vertical-align: middle; }
         pre { outline: 1px solid #ccc; padding: 5px; margin: 5px; margin-left: 20px; }
@@ -117,8 +163,21 @@
     </style>
 </head>
 <body>
-    <input id="in" value="12452" onkeypress="{if (event.keyCode==13) calc(event);}"/><button onclick="{calc(event);}">Calculate</button>
+    <select id="selectType"></select><input id="in" value="12452" onkeypress="{if (event.keyCode==13) calc(event);}"/><button onclick="{calc(event);}">Calculate</button>
     <div id="res"><img width="40" height="40" id="icon"/><span id="data"></span></div>
     <pre id="res2"></pre>
+    <script>
+        var select = document.getElementById("selectType");
+        for (var key in linkTypes) {
+            if (linkTypes.hasOwnProperty(key)) {
+                var opt = linkTypes[key]+". "+key;
+                var el = document.createElement("option");
+                el.textContent = opt;
+                el.value = linkTypes[key];
+                if(linkTypes[key] == 2) el.setAttribute("selected", "selected");
+                select.appendChild(el);
+            }
+        }
+    </script>
 </body>
 </html>
