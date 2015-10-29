@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sigils</title>
+</head>
+<body>
+<pre id="out"></pre>
+<script>
+    function init() {
+        lookUp();
+    } init();
+
+    results = [];
+    function lookUp(page) {
+        if(!page) { page = 1; }
+        httpGetAsync('https://www.gw2spidy.com/api/v0.9/json/item-search/sigil/' + page, function (res) {
+            console.log(typeof res + " " + res);
+            results.concat(res.results);
+            console.log(res.last_page + " " + results.length);
+            if (page < res.last_page) {
+                lookUp(page+1);
+            }
+        });
+    }
+
+    function httpGetAsync(theUrl, callback)
+    {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        };
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+</script>
+</body>
+</html>
